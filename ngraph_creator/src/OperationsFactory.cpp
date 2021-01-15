@@ -4,16 +4,17 @@ namespace android {
 namespace hardware {
 namespace neuralnetworks {
 namespace nnhal {
-    
-OperationsFactory::OperationsFactory(const std::string& plugin, std::shared_ptr<NgraphNodes> nodes) : mNgraphNodes(nodes)
-{ OperationsBase::sPluginType = plugin; }
-std::shared_ptr<OperationsBase> OperationsFactory::getOperation(const OperationType& type, const Model& model)
-{
+
+OperationsFactory::OperationsFactory(const std::string& plugin, std::shared_ptr<NgraphNodes> nodes)
+    : mNgraphNodes(nodes) {
+    OperationsBase::sPluginType = plugin;
+}
+std::shared_ptr<OperationsBase> OperationsFactory::getOperation(const OperationType& type,
+                                                                const Model& model) {
     auto opIter = mOperationsMap.find(type);
-    if(opIter != mOperationsMap.end())
-        return opIter->second;
-        
-    switch(type) {
+    if (opIter != mOperationsMap.end()) return opIter->second;
+
+    switch (type) {
         case OperationType::ADD:
             mOperationsMap[type] = std::make_shared<Add>(model);
             break;
@@ -27,7 +28,7 @@ std::shared_ptr<OperationsBase> OperationsFactory::getOperation(const OperationT
     return mOperationsMap[type];
 }
 
-}
-}
-}
-}
+}  // namespace nnhal
+}  // namespace neuralnetworks
+}  // namespace hardware
+}  // namespace android
