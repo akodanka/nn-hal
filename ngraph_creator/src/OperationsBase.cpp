@@ -24,10 +24,15 @@ std::shared_ptr<ngraph::Node> OperationsBase::transpose(ConversionType type, std
 }
     
 //override createNodeForPlugin in case sPluginType specific implementation is required
-std::shared_ptr<ngraph::Node> OperationsBase::createNodeForPlugin(const Operation& op, const std::vector<std::shared_ptr<ngraph::Node>>& nodes)
-{ return createNode( op, nodes); }
+std::shared_ptr<ngraph::Node> OperationsBase::createNodeForPlugin(const Operation& op)
+{ return createNode( op); }
 
 OperationsBase::OperationsBase(const Model& model) : mModel(model) {}
+
+void OperationsBase::setNgraphNodes(std::shared_ptr<NgraphNodes> nodes)
+{
+    mNgraphNodes = nodes;
+}
 
 bool OperationsBase::validate(const Operation& op)
 { return true; }

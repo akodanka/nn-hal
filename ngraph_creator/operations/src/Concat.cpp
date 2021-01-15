@@ -34,7 +34,7 @@ Concat::Concat(const Model& model) : OperationsBase(model) {}
 bool Concat::validate(const Operation& op)
 { return true; }
 
-std::shared_ptr<ngraph::Node> Concat::createNode(const Operation& operation, const std::vector<std::shared_ptr<ngraph::Node>>& nodes)
+std::shared_ptr<ngraph::Node> Concat::createNode(const Operation& operation)
 {
     auto n = operation.inputs.size() - 1;
     std::vector<uint32_t> axisMap = {2, 3, 1};  // NCHW = axisMap[NHWC]
@@ -44,7 +44,7 @@ std::shared_ptr<ngraph::Node> Concat::createNode(const Operation& operation, con
     for (int i = 0; i < n; i++)
     {
         auto inputIndex = operation.inputs[i];
-        auto inputOp = nodes[inputIndex];
+        auto inputOp = mNgraphNodes->getOperationOutput(inputIndex);
         const auto op = mModel.operands[inputIndex];
         ALOGD("createNode inputIndex %d, inputOp %s, lifetime %d", inputIndex, (inputOp ? "Valid" : "NULL"), op.lifetime);
         if(op.lifetime == OperandLifeTime::CONSTANT_COPY || op.lifetime == OperandLifeTime::CONSTANT_REFERENCE || op.lifetime == OperandLifeTime::MODEL_INPUT)//TODO: should use NNAPI_Utils::isConst || isInput

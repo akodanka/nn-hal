@@ -5,7 +5,8 @@ namespace hardware {
 namespace neuralnetworks {
 namespace nnhal {
     
-OperationsFactory::OperationsFactory(const std::string& plugin) { OperationsBase::sPluginType = plugin; }
+OperationsFactory::OperationsFactory(const std::string& plugin, std::shared_ptr<NgraphNodes> nodes) : mNgraphNodes(nodes)
+{ OperationsBase::sPluginType = plugin; }
 std::shared_ptr<OperationsBase> OperationsFactory::getOperation(const OperationType& type, const Model& model)
 {
     auto opIter = mOperationsMap.find(type);
@@ -15,13 +16,15 @@ std::shared_ptr<OperationsBase> OperationsFactory::getOperation(const OperationT
     switch(type) {
         case OperationType::ADD:
             mOperationsMap[type] = std::make_shared<Add>(model);
-            return mOperationsMap[type];
+            break;
         case OperationType::CONCATENATION:
             mOperationsMap[type] = std::make_shared<Concat>(model);
-            return mOperationsMap[type];
+            break;
         default:
             return nullptr;
     }
+    mOperationsMap[type]->setNgraphNodes(mNgraphNodes);
+    return mOperationsMap[type];
 }
 
 }
