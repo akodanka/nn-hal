@@ -5,10 +5,10 @@ namespace hardware {
 namespace neuralnetworks {
 namespace nnhal {
 
-std::string OperationsBase::sPluginType;
+// std::string OperationsBase::mPluginType;
 
 std::shared_ptr<ngraph::Node> OperationsBase::transpose(ConversionType type,
-                                                        ngraph::Output<ngraph::Node> input) {
+                                                        std::shared_ptr<ngraph::Node> input) {
     ngraph::AxisVector order;
     switch (type) {
         case NHWC_NCHW:

@@ -102,6 +102,7 @@ bool Convolution::validate(const Operation& op, NnapiModelInfo* modelInfo) {
     return true;
 }
 bool Convolution::createNode(const Operation& nnApiOp) {
+    int op_size = nnApiOp.inputs.size();
     std::shared_ptr<ngraph::Node> inputNode = nullptr, filterNode = nullptr, biasNode = nullptr,
                                   activation = nullptr;
     ;
@@ -169,14 +170,14 @@ bool Convolution::createNode(const Operation& nnApiOp) {
     std::vector<size_t> dilations;
     ngraph::op::PadType auto_pad;
 
-    auto inputIndex = op.inputs[0];
-    auto filterIndex = op.inputs[1];
+    auto inputIndex = nnApiOp.inputs[0];
+    auto filterIndex = nnApiOp.inputs[1];
     auto input = mModelInfo->getOperand(inputIndex);
     auto filter = mModelInfo->getOperand(filterIndex);
     input_width = input.dimensions[2];
     input_height = input.dimensions[1];
-    filter_width = filter.dimensions.dimensions[2];
-    filter_height = filter.dimensions.dimensions[1];
+    filter_width = filter.dimensions[2];
+    filter_height = filter.dimensions[1];
 
     if (op_size == 13) {
         // Explicit padding
@@ -238,15 +239,16 @@ bool Convolution::createNode(const Operation& nnApiOp) {
     ALOGD("========> Creating bias node");
     biasNode = createNode(nnApiOp, 2);
 
-    strides = {stride_width, stride_height};
+    strides = {(size_t)stride_width, (size_t)stride_height};
     pads_begin = {padding_left, padding_top};
     pads_end = {padding_right, padding_bottom};
-    dilations = {dilation_width_factor, dilation_height_factor};
+    dilations = {(size_t)dilation_width_factor, (size_t)dilation_height_factor};
 
     if (!useNchw) {
         inputNode = transpose(NHWC_NCHW, inputNode);
     }
 
+    std::string activationFnName;
     std::shared_ptr<ngraph::Node> convNode;
 
     convNode = std::make_shared<ngraph::opset3::Convolution>(
@@ -257,17 +259,17 @@ bool Convolution::createNode(const Operation& nnApiOp) {
         switch (activationFn) {
             case (int32_t)FusedActivationFunc::RELU:
                 ALOGD("Adding relu");
-                activation = std::make_shared<ngraph::opset3::Relu>(addOp);
+                activation = std::make_shared<ngraph::opset3::Relu>(convNode);
                 activationFnName = "relu";
                 break;
             case (int32_t)FusedActivationFunc::RELU6:
                 ALOGD("Adding relu6");
-                activation = std::make_shared<ngraph::opset3::Clamp>(addOp, -1, 1);
+                activation = std::make_shared<ngraph::opset3::Clamp>(convNode, -1, 1);
                 activationFnName = "relu6";
                 break;
             case (int32_t)FusedActivationFunc::RELU1:
                 ALOGD("Adding relu1");
-                activation = std::make_shared<ngraph::opset3::Clamp>(addOp, 0, 6);
+                activation = std::make_shared<ngraph::opset3::Clamp>(convNode, 0, 6);
                 activationFnName = "relu1";
                 break;
             default:

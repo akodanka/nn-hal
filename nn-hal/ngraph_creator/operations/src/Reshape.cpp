@@ -83,10 +83,10 @@ bool Reshape::createNode(const Operation& nnApiOp) {
     ALOGD("========> Creating shape node");
     shapeNode = createNode(nnApiOp, 1);
 
-    auto shapeIndex = op.inputs[1];
+    auto shapeIndex = nnApiOp.inputs[1];
     auto shapeOperand = mModelInfo->getOperand(shapeIndex);
 
-    if (shapeIndex.dimensions[0] == 0) {
+    if ((int)shapeOperand.dimensions[0] == 0) {
         special_zero = true;
     } else {
         special_zero = false;

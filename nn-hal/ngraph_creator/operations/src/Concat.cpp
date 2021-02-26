@@ -33,7 +33,7 @@ bool Concat::validate(const Operation& op, NnapiModelInfo* modelInfo) {
 }
 
 bool Concat::createNode(const Operation& nnApiOp) {
-    auto n = operation.inputs.size() - 1;
+    auto n = nnApiOp.inputs.size() - 1;
 
     // //TODO:check with anoob
     // std::vector<uint32_t> axisMap = {2, 3, 1};  // NCHW = axisMap[NHWC]
@@ -42,7 +42,7 @@ bool Concat::createNode(const Operation& nnApiOp) {
     auto axis = mModelInfo->ParseOperationInput<uint32_t>(nnApiOp, n);
 
     // std::vector<ngraph::Output<ngraph::Node>> inputs;
-    std::vector<std::shared_ptr<Node>> inputs;
+    std::vector<std::shared_ptr<ngraph::Node>> inputs;
     ALOGD("createNode n %d, axis %d", n, axis);
 
     auto createNode = [&](Operation op,
@@ -71,20 +71,20 @@ bool Concat::createNode(const Operation& nnApiOp) {
             ALOGD("Input is of type temporary variable or unsupported");
             return nullptr;
         }
-    }
+    };
 
-                                             auto getNode = [&](uint32_t index) {
-                                                 std::shared_ptr<ngraph::Node> node;
-                                                 uint32_t outIndex;
-                                                 std::tie(node, outIndex) =
-                                                     mNwCreator->getIntermediateNodeOutput(index);
-                                                 return node->outputs()[outIndex];
-                                             };
+    auto getNode = [&](uint32_t index) {
+        std::shared_ptr<ngraph::Node> node;
+        uint32_t outIndex;
+        std::tie(node, outIndex) =
+            mNwCreator->getIntermediateNodeOutput(index);
+        return node->outputs()[outIndex];
+    };
 
     for (int i = 0; i < n; i++) {
         std::shared_ptr<ngraph::Node> inputNode = nullptr;
         inputNode = createNode(nnApiOp, i);
-        inputs.push_back(inputOp);
+        inputs.push_back(inputNode);
     }
 
     std::shared_ptr<ngraph::Node> concatNode;

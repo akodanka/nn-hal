@@ -33,7 +33,7 @@ private:
     std::map<uint32_t, std::tuple<std::shared_ptr<ngraph::Node>, uint32_t>> mIntermediates;
 
 public:
-    NgraphNetworkCreator(NnapiModelInfo* model, const std::string& plugin);
+    NgraphNetworkCreator(NnapiModelInfo* model, const std::string& plugin): mModelInfo(model){};
 
     bool init();
     InferenceEngine::CNNNetwork* generateIRGraph();

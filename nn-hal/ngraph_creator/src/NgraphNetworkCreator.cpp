@@ -7,12 +7,12 @@ namespace hardware {
 namespace neuralnetworks {
 namespace nnhal {
 
-NgraphNetworkCreator::NgraphNetworkCreator(NnapiModelInfo* model, const std::string& plugin)
-    : mModelInfo(model),
-      mNgraphNodes(std::make_shared<NgraphNodes>(mModelInfo->getModel().operands.size())),
-      mOpFctryInst(plugin, mNgraphNodes) {
-    ALOGD("NgraphNetworkCreator Constructed");
-}
+// NgraphNetworkCreator::NgraphNetworkCreator(NnapiModelInfo* model, const std::string& plugin)
+//     : mModelInfo(model),
+//       mNgraphNodes(std::make_shared<NgraphNodes>(mModelInfo->getModel().operands.size())),
+//       mOpFctryInst(plugin, mNgraphNodes) {
+//     ALOGD("NgraphNetworkCreator Constructed");
+// }
 
 std::map<OperationType, std::shared_ptr<OperationsBase>> OperationsFactory::mOperationsMap;
 
@@ -26,7 +26,7 @@ InferenceEngine::CNNNetwork* NgraphNetworkCreator::generateIRGraph() {
 
     auto operations = mModelInfo->getOperations();
     for (const auto& op : operations) {
-        auto nGraphOp = NgraphOpsFactory::createNgraphOp(op.type, mModelInfo, this);
+        auto nGraphOp = OperationsFactory::createNgraphOp(op.type, mModelInfo, this);
         if (!nGraphOp->createNode(op)) {
             ALOGE("Failed to createNode for op type:%d", op.type);
             return nullptr;

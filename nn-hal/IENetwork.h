@@ -8,7 +8,7 @@
 #include <ie_input_info.hpp>
 #include <vector>
 
-// #include "utils.h"
+#include "utils.h"
 // #include "ie_blob.h"
 // #include "ie_common.h"
 // #include "ie_core.hpp"

@@ -31,12 +31,12 @@ bool FullyConnected::validate(const Operation& op, NnapiModelInfo* modelInfo) {
 
     if ((static_cast<int>(input0.type) ==
          static_cast<int>(V1_0::OperandType::TENSOR_QUANT8_ASYMM)) ||
-        (input0.type == OperandType::TENSOR_QUANT8_ASYMM_SIGNED) ||
+        (input0.type == OperandType::TENSOR_QUANT8_ASYMM) ||
         (static_cast<int>(input0.type) ==
          static_cast<int>(V1_2::OperandType::TENSOR_QUANT16_ASYMM)) ||
         (static_cast<int>(input0.type) ==
          static_cast<int>(V1_2::OperandType::TENSOR_QUANT16_SYMM))) {
-        ALOGE("Unsupported data type format.. TENSOR_QUANT8_ASYMM Or TENSOR_QUANT8_ASYMM_SIGNED");
+        ALOGE("Unsupported data type format.. TENSOR_QUANT8_ASYMM");
         return false;
     }
 
@@ -73,9 +73,9 @@ bool FullyConnected::createNode(const Operation& nnApiOp) {
         auto nnOperand = mModelInfo->getOperand(inputIndex);
 
         ALOGD("Input index: %d type: %d", inputIndex, nnOperand.type);
-        if (nnOperand.lifetime == OperandLifeTime::SUBGRAPH_INPUT) {
+        if (nnOperand.lifetime == OperandLifeTime::MODEL_INPUT) {
             std::string name = "Add-" + std::to_string(mNwCreator->getNumber());
-            ALOGD("Input is of type subgraph input %s  type=%d", name.c_str(), nnOperand.type);
+            ALOGD("Input is of type input %s  type=%d", name.c_str(), nnOperand.type);
             auto in = std::make_shared<ngraph::opset3::Parameter>(
                 ngraph::element::f32, toNgraphShape(nnOperand.dimensions));
             in->set_friendly_name(name);
@@ -184,8 +184,8 @@ bool FullyConnected::createNode(const Operation& nnApiOp) {
                 mNwCreator->mapIntermediateNodeOutput(nnApiOp.outputs[0], addOp, 0);
             }
             break;
-        case OperandLifeTime::SUBGRAPH_OUTPUT:
-            ALOGD("Output lifetime SUBGRAPH OUTPUT");
+        case OperandLifeTime::MODEL_OUTPUT:
+            ALOGD("Output lifetime MODEL OUTPUT");
             mNwCreator->addResultNode(nnApiOp.outputs[0], activationFn ? activation : addOp);
             mNwCreator->addLayerMetadata(nnApiOp.outputs[0], LayerInfo(outputName, false), false);
             break;

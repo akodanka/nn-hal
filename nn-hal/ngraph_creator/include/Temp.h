@@ -2,6 +2,7 @@
 
 #include <Driver.h>
 #include <log/log.h>
+#include <ngraph/shape.hpp>
 
 #define OP_INPUT_IDX_CONV 0
 static const std::string INVALID_STRING("Invalid Node");
@@ -28,25 +29,29 @@ struct LayerInfo {
     }
 };
 
-// // TODO: should use NNAPI_Utils:: GetConstOperand, ParseOperationInput
-// static int GetConstOperand(const Model& model, uint32_t index) {
-//     const auto op = model.operands[index];
-//     if (op.lifetime == OperandLifeTime::CONSTANT_COPY) {
-//         if (op.location.poolIndex != 0) {
-//             ALOGE("CONSTANT_COPY expects poolIndex to be 0");
-//             // nnAssert(false);
-//         }
-//         ALOGD("operand lifetime OperandLifeTime::CONSTANT_COPY");
-//         return model.operandValues[op.location.offset];
-//     }
-//     ALOGE("FIX ME : Return unknown");
-//     return 0;
-// }
-// static int ParseOperationInput(const Model& model, const Operation& operation, uint32_t index) {
-//     uint32_t inputIndex = operation.inputs[index];
-//     const auto operand = model.operands[inputIndex];
-//     return GetConstOperand(model, inputIndex);
-// }
+static ngraph::Shape toNgraphShape(const std::vector<uint32_t>& dimensions) {
+    ngraph::Shape shapeVec;
+    for (auto i=0; i < dimensions.size(); i++) {
+        shapeVec.push_back(static_cast<size_t>(dimensions[i]));
+    }
+    return shapeVec;
+}
+
+static void calculateExplicitPadding(int32_t in_size, int32_t stride, int32_t filter_size,
+                              int32_t padding_implicit, int32_t* padding_head,
+                              int32_t* padding_tail) {
+    *padding_head = 0;
+    *padding_tail = 0;
+
+    if (padding_implicit == 1) {
+        int32_t out_size = (in_size + stride - 1) / stride;
+        int32_t tmp = (out_size - 1) * stride + filter_size;
+        if (tmp > in_size) {
+            *padding_head = (tmp - in_size) / 2;
+            *padding_tail = (tmp - in_size) - *padding_head;
+        }
+    }
+}
 
 }  // namespace nnhal
 }  // namespace neuralnetworks
