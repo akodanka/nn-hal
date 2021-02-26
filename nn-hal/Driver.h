@@ -30,12 +30,18 @@
 #include <android/hardware/neuralnetworks/1.2/types.h>
 
 #include <string>
+// #include <android/hidl/allocator/1.0/IAllocator.h>
+// #include <android/hidl/memory/1.0/IMemory.h>
+// #include <hidlmemory/mapping.h>
+#include "cutils/log.h"
 
 namespace android {
 namespace hardware {
 namespace neuralnetworks {
 namespace nnhal {
 
+// using ::android::hidl::allocator::V1_0::IAllocator;
+// using ::android::hidl::memory::V1_0::IMemory;
 // For HAL-1.0 version
 using namespace ::android::hardware::neuralnetworks::V1_0;
 using V1_0_Model = ::android::hardware::neuralnetworks::V1_0::Model;

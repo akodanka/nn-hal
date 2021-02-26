@@ -1,5 +1,5 @@
-#ifndef __CONCAT_H
-#define __CONCAT_H
+#ifndef __FULLY_CONNECTED_H
+#define __FULLY_CONNECTED_H
 
 #include <OperationsBase.hpp>
 
@@ -8,13 +8,13 @@ namespace hardware {
 namespace neuralnetworks {
 namespace nnhal {
 
-class Concat : public OperationsBase {
+// create an FullyConnected Node based on the arguments/parameters.
+class FullyConnected : public OperationsBase {
 public:
-    Concat(NnapiModelInfo* model, NgraphNetworkCreator* nwCreator)
+    FullyConnected(NnapiModelInfo* model, NgraphNetworkCreator* nwCreator)
         : OperationsBase(model, nwCreator) {}
     static bool validate(const Operation& op, NnapiModelInfo* modelInfo);
     bool createNode(const Operation& operation) override;
-    virtual ~Concat() {}
 };
 
 }  // namespace nnhal

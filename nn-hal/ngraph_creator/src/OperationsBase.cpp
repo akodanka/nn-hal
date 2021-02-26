@@ -23,20 +23,21 @@ std::shared_ptr<ngraph::Node> OperationsBase::transpose(ConversionType type,
 }
 
 // override createNodeForPlugin in case sPluginType specific implementation is required
-std::shared_ptr<ngraph::Node> OperationsBase::createNodeForPlugin(const Operation& op) {
-    return createNode(op);
-}
+// std::shared_ptr<ngraph::Node> OperationsBase::createNodeForPlugin(const Operation& op) {
+//     return createNode(op);
+// }
 
-// override connectOperationToGraph in case Operation has multiple outputs
-void OperationsBase::connectOperationToGraph(const Operation& op) {
-    mNgraphNodes->setOperationOutput(op.outputs[0], createNodeForPlugin(op)->get_default_output());
-}
+// // override connectOperationToGraph in case Operation has multiple outputs
+// void OperationsBase::connectOperationToGraph(const Operation& op) {
+//     mNgraphNodes->setOperationOutput(op.outputs[0],
+//     createNodeForPlugin(op)->get_default_output());
+// }
 
-OperationsBase::OperationsBase(const Model& model) : mModel(model) {}
+// OperationsBase::OperationsBase(const Model& model) : mModel(model) {}
 
-void OperationsBase::setNgraphNodes(std::shared_ptr<NgraphNodes> nodes) { mNgraphNodes = nodes; }
+// void OperationsBase::setNgraphNodes(std::shared_ptr<NgraphNodes> nodes) { mNgraphNodes = nodes; }
 
-bool OperationsBase::validate(const Operation& op) { return true; }
+// bool OperationsBase::validate(const Operation& op) { return true; }
 
 }  // namespace nnhal
 }  // namespace neuralnetworks

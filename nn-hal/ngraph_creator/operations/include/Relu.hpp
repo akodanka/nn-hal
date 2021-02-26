@@ -1,5 +1,5 @@
-#ifndef __CONCAT_H
-#define __CONCAT_H
+#ifndef __RELU_H
+#define __RELU_H
 
 #include <OperationsBase.hpp>
 
@@ -8,13 +8,15 @@ namespace hardware {
 namespace neuralnetworks {
 namespace nnhal {
 
-class Concat : public OperationsBase {
+// To create an Relu Node based on the arguments/parameters.
+class Relu : public OperationsBase {
 public:
-    Concat(NnapiModelInfo* model, NgraphNetworkCreator* nwCreator)
+    Relu(NnapiModelInfo* model, NgraphNetworkCreator* nwCreator)
         : OperationsBase(model, nwCreator) {}
+
     static bool validate(const Operation& op, NnapiModelInfo* modelInfo);
     bool createNode(const Operation& operation) override;
-    virtual ~Concat() {}
+    virtual ~Relu() {}
 };
 
 }  // namespace nnhal

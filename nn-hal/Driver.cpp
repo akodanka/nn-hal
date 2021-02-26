@@ -25,6 +25,8 @@
 #include "GnaPreparedModel.h"
 #include "ValidateHal.h"
 
+#include "OperationsFactory.hpp"
+
 namespace android {
 namespace hardware {
 namespace neuralnetworks {
@@ -167,6 +169,7 @@ Return<void> Driver::getSupportedOperations_1_2(const Model& model,
                                                 getSupportedOperations_1_2_cb cb) {
     ALOGV("Entering %s", __func__);
 
+    std::unique_ptr<NnapiModelInfo> modelInfo = std::make_unique<NnapiModelInfo>(model);
     int count = model.operations.size();
     std::vector<bool> supported(count, true);
 
@@ -178,7 +181,7 @@ Return<void> Driver::getSupportedOperations_1_2(const Model& model,
 
     for (int i = 0; i < count; i++) {
         const auto& operation = model.operations[i];
-        supported[i] = BasePreparedModel::isOperationSupported(operation, model);
+        supported[i] = OperationsFactory::isOperationSupported(operation, modelInfo.get());
     }
     cb(ErrorStatus::NONE, supported);
     ALOGV("Exiting %s", __func__);

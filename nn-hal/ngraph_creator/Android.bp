@@ -12,6 +12,11 @@ cc_library_static {
         "src/NgraphNodes.cpp",
         "operations/src/Add.cpp",
         "operations/src/Concat.cpp",
+        "operations/src/Convolution.cpp",
+        "operations/src/DepthwiseConv.cpp",
+        "operations/src/FullyConnected.cpp",
+        "operations/src/Relu.cpp",
+        "operations/src/Reshape.cpp"
     ],
 
     header_libs: [

@@ -1,5 +1,5 @@
-#ifndef __CONCAT_H
-#define __CONCAT_H
+#ifndef __RESHAPE_H
+#define __RESHAPE_H
 
 #include <OperationsBase.hpp>
 
@@ -8,13 +8,15 @@ namespace hardware {
 namespace neuralnetworks {
 namespace nnhal {
 
-class Concat : public OperationsBase {
+// To create an Reshape Node based on the arguments/parameters.
+class Reshape : public OperationsBase {
 public:
-    Concat(NnapiModelInfo* model, NgraphNetworkCreator* nwCreator)
+    Reshape(NnapiModelInfo* model, NgraphNetworkCreator* nwCreator)
         : OperationsBase(model, nwCreator) {}
+
     static bool validate(const Operation& op, NnapiModelInfo* modelInfo);
     bool createNode(const Operation& operation) override;
-    virtual ~Concat() {}
+    virtual ~Reshape() {}
 };
 
 }  // namespace nnhal

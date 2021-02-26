@@ -1,22 +1,33 @@
-#include <Add.hpp>
+#include <FullyConnected.hpp>
 #include <NgraphNetworkCreator.hpp>
 
-#define LOG_TAG "AddOperation"
+#define LOG_TAG "FCOperation"
 
 namespace android {
 namespace hardware {
 namespace neuralnetworks {
 namespace nnhal {
+
 using FusedActivationFunc = V1_0::FusedActivationFunc;
 
-bool Add::validate(const Operation& op, NnapiModelInfo* modelInfo) {
+static std::string toString(const std::vector<uint32_t>& range) {
+    std::string os = "[";
+    for (size_t i = 0; i < range.size(); ++i) {
+        os += (i == 0 ? "" : ", ") + std::to_string(range[i]);
+    }
+    return os += "]";
+}
+
+bool FullyConnected::validate(const Operation& op, NnapiModelInfo* modelInfo) {
     const auto& input0 = modelInfo->getOperand(op.inputs[0]);
     const auto& input1 = modelInfo->getOperand(op.inputs[1]);
+    const auto& input2 = modelInfo->getOperand(op.inputs[2]);
 
-    if (input0.type != input1.type) {
-        ALOGE("NNERR:input0 and input1 type not equal,aborting!!");
-        return false;
-    }
+    ALOGD("Dimensions(op 0): %s Dimensions(op 1): %s Dimensions(op 2): %s",
+          toString(input0.dimensions).c_str(), toString(input1.dimensions).c_str(),
+          toString(input2.dimensions).c_str());
+
+    ALOGD("Type(op 0): %d Type(op 1): %d Type(op 2): %d", input0.type, input1.type, input2.type);
 
     if ((static_cast<int>(input0.type) ==
          static_cast<int>(V1_0::OperandType::TENSOR_QUANT8_ASYMM)) ||
@@ -29,22 +40,32 @@ bool Add::validate(const Operation& op, NnapiModelInfo* modelInfo) {
         return false;
     }
 
+    if (input0.type != input1.type) {
+        ALOGE("NNERR:input0 and input1 type not equal,aborting!!");
+        return false;
+    }
+
     const auto& output = modelInfo->getOperand(op.outputs[0]);
     if (output.type != input0.type) {
         ALOGE("NNERR: output type not equalt to input0 type ,aborting!!");
         return false;
     }
 
-    ALOGD("type: %d type: %d", input0.type, input1.type);
+    if (input0.dimensions.size() < 2) {
+        ALOGE("Invalid input parameter dimensions!!!");
+        return false;
+    }
 
-    ALOGD("Add::Validate succeeded");
+    ALOGI("FullyConnected::Validate succeeded");
     return true;
 }
 
-bool Add::createNode(const Operation& nnApiOp) {
+// Make it std::unique pointer..
+bool FullyConnected::createNode(const Operation& nnApiOp) {
     ALOGD("%s", __func__);
 
-    std::shared_ptr<ngraph::Node> inNode0 = nullptr, inNode1 = nullptr, activation = nullptr;
+    std::shared_ptr<ngraph::Node> input, weights, bias, addOp, activation;
+    input = weights = bias = activation = addOp = nullptr;
 
     auto createNode = [&](Operation op, uint32_t index) -> std::shared_ptr<ngraph::Node> {
         auto inputIndex = op.inputs[index];
@@ -85,10 +106,11 @@ bool Add::createNode(const Operation& nnApiOp) {
             return nullptr;
         }
     };
+
     ALOGD("========> Creating Node 0");
-    inNode0 = createNode(nnApiOp, 0);
+    input = createNode(nnApiOp, 0);
     ALOGD("========> Creating Node 1");
-    inNode1 = createNode(nnApiOp, 1);
+    weights = createNode(nnApiOp, 1);
 
     auto getNode = [&](uint32_t index) {
         std::shared_ptr<ngraph::Node> node;
@@ -97,15 +119,24 @@ bool Add::createNode(const Operation& nnApiOp) {
         return node->outputs()[outIndex];
     };
 
-    auto addOp = std::make_shared<ngraph::opset3::Add>(
-        (inNode0 != nullptr) ? inNode0 : getNode(nnApiOp.inputs[0]),
-        (inNode1 != nullptr) ? inNode1 : getNode(nnApiOp.inputs[1]),
-        ngraph::op::AutoBroadcastType::NUMPY);
-    mNwCreator->appendNodeToMap(addOp);
+    auto multiply = std::make_shared<ngraph::opset3::MatMul>(
+        (input != nullptr) ? input : getNode(nnApiOp.inputs[0]),
+        (weights != nullptr) ? weights : getNode(nnApiOp.inputs[1]), false, true);
+    mNwCreator->appendNodeToMap(multiply);
+
+    // Check if the bias is available
+    if (mModelInfo->getOperand(nnApiOp.inputs[2]).dimensions.size() == 0) {
+        ALOGD("No bias for the operation !!!");
+    } else {
+        bias = createNode(nnApiOp, 2);
+        addOp = std::make_shared<ngraph::opset3::Add>(
+            multiply, (bias != nullptr) ? bias : getNode(nnApiOp.inputs[2]),
+            ngraph::op::AutoBroadcastType::NUMPY);
+    }
 
     uint32_t activationFn = 0;
     std::string activationFnName;
-    activationFn = mModelInfo->ParseOperationInput<uint32_t>(nnApiOp, 2);
+    activationFn = mModelInfo->ParseOperationInput<uint32_t>(nnApiOp, 3);
 
     if (activationFn) {
         // Special case .. Need to add generic template to handle activation functions
@@ -126,12 +157,15 @@ bool Add::createNode(const Operation& nnApiOp) {
                 activationFnName = "relu1";
                 break;
             default:
-                ALOGD("UNKNOWN ACTIVATION FUNCTION !!!!!");
+                nnAssert("UNKNOWN ACTIVATION FUNCTION !!!!!");
                 break;
         }
-        activationFnName += std::to_string(mNwCreator->getNumber());
-        activation->set_friendly_name(activationFnName);
-        mNwCreator->appendNodeToMap(activation);
+
+        if (activation) {
+            activationFnName += std::to_string(mNwCreator->getNumber());
+            activation->set_friendly_name(activationFnName);
+            mNwCreator->appendNodeToMap(activation);
+        }
     }
 
     auto outputName = activationFn ? activation->outputs()[0].get_node()->get_friendly_name()

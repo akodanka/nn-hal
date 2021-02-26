@@ -1,5 +1,5 @@
-#ifndef __CONCAT_H
-#define __CONCAT_H
+#ifndef __DWCONVOLUTION_H
+#define __DWCONVOLUTION_H
 
 #include <OperationsBase.hpp>
 
@@ -8,13 +8,15 @@ namespace hardware {
 namespace neuralnetworks {
 namespace nnhal {
 
-class Concat : public OperationsBase {
+// To create an DepthwiseConv Node based on the arguments/parameters.
+class DepthwiseConv : public OperationsBase {
 public:
-    Concat(NnapiModelInfo* model, NgraphNetworkCreator* nwCreator)
+    DepthwiseConv(NnapiModelInfo* model, NgraphNetworkCreator* nwCreator)
         : OperationsBase(model, nwCreator) {}
+
     static bool validate(const Operation& op, NnapiModelInfo* modelInfo);
     bool createNode(const Operation& operation) override;
-    virtual ~Concat() {}
+    virtual ~DepthwiseConv() {}
 };
 
 }  // namespace nnhal
