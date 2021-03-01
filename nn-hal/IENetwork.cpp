@@ -1,3 +1,4 @@
+#define LOG_TAG "IENetwork"
 #include "IENetwork.h"
 #include "ie_common.h"
 

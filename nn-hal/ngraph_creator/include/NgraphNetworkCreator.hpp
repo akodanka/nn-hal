@@ -1,6 +1,7 @@
 #ifndef __NGRAPH_NW_CREATOR_H
 #define __NGRAPH_NW_CREATOR_H
 // #include <NgraphNodes.hpp>
+#define LOG_TAG "NgraphNetworkCreator"
 
 #include "ModelManager.h"
 #include "OperationsBase.hpp"

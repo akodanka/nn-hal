@@ -1,5 +1,5 @@
 #pragma once
-
+#define LOG_TAG "NgraphTemp"
 #include <Driver.h>
 #include <log/log.h>
 #include <ngraph/shape.hpp>

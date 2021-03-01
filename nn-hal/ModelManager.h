@@ -20,10 +20,11 @@ using Blob = InferenceEngine::Blob;
 // Utility class that provides functions and methods around NNAPI Model
 class NnapiModelInfo {
 public:
-    NnapiModelInfo(const Model& model) { mModel = model; }
+    NnapiModelInfo(const Model& model) { 
+        mModel = model; 
+    }
 
     bool initRuntimeInfo() {
-        if (!initializeRunTimeOperandInfo()) return false;
 
         mPoolInfos.resize(mModel.pools.size());
         for (size_t i = 0; i < mModel.pools.size(); i++) {
@@ -33,6 +34,7 @@ public:
                 return false;
             }
         }
+        if (!initializeRunTimeOperandInfo()) return false;
 
         return true;
     }

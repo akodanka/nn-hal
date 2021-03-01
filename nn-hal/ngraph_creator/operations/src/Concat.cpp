@@ -11,7 +11,7 @@ namespace nnhal {
 bool Concat::validate(const Operation& op, NnapiModelInfo* modelInfo) {
     ALOGV("Entering %s", __func__);
     int op_size = op.inputs.size();
-    ALOGD("Convolution input size = %d\n", op_size);
+    // ALOGD("Concat input size = %d\n", op_size);
 
     // Check Output type
     const auto& outputOperand = modelInfo->getOperand(op.outputs[0]);
@@ -66,6 +66,14 @@ bool Concat::createNode(const Operation& nnApiOp) {
             mNwCreator->addLayerMetadata(inputIndex, LayerInfo(name, false), true);
 
             ALOGD("Done ...........");
+            return in;
+        } else if ((nnOperand.lifetime == OperandLifeTime::CONSTANT_COPY) ||
+                   (nnOperand.lifetime == OperandLifeTime::CONSTANT_REFERENCE)) {
+            ALOGD("Input is of type : const copy / reference %d", nnOperand.dimensions.size());
+            auto vals = mModelInfo->GetConstVecOperand<float>(inputIndex);
+
+            auto in = std::make_shared<ngraph::opset3::Constant>(
+                ngraph::element::f32, ngraph::Shape(toNgraphShape(nnOperand.dimensions)), vals);
             return in;
         } else {
             ALOGD("Input is of type temporary variable or unsupported");

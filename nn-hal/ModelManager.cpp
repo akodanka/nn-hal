@@ -1,5 +1,7 @@
 #include "ModelManager.h"
 
+#define LOG_TAG "ModelManager"
+
 namespace android {
 namespace hardware {
 namespace neuralnetworks {
@@ -8,6 +10,7 @@ namespace nnhal {
 bool NnapiModelInfo::initializeRunTimeOperandInfo() {
     // initialize runtime operand info from model.
     const size_t count = mModel.operands.size();
+    ALOGD("Operand size = %d\n", count);
     if (!count) {
         ALOGE("NNERR:Operand Count is 0");
         return false;
@@ -18,6 +21,7 @@ bool NnapiModelInfo::initializeRunTimeOperandInfo() {
     // Start by setting the runtime info to what's in the model.
     for (size_t i = 0; i < count; i++) {
         const Operand& from = mModel.operands[i];
+        dumpOperand(i, mModel);
         RunTimeOperandInfo& to = mOperands[i];
         to.dimensions.resize(from.dimensions.size());
         for (size_t j = 0; j < from.dimensions.size(); j++) {

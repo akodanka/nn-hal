@@ -1,6 +1,6 @@
 #ifndef __OPERATIONS_BASE_H
 #define __OPERATIONS_BASE_H
-
+#define LOG_TAG "OperationBase"
 #include <Driver.h>
 #include <Temp.h>  //TODO: Remove this once NNAPI_Utils is ready
 #include <android/log.h>

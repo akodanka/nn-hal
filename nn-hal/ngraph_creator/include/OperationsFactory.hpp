@@ -1,6 +1,6 @@
 #ifndef __OPERATIONS_FACTORY_H
 #define __OPERATIONS_FACTORY_H
-
+#define LOG_TAG "OperationsFactory"
 #include <Add.hpp>
 #include <Concat.hpp>
 #include <Convolution.hpp>
@@ -91,7 +91,7 @@ public:
             }
         }
 
-        ALOGD("%s succeeded", __func__);
+        // ALOGD("%s succeeded", __func__);
         return true;
     }
 };

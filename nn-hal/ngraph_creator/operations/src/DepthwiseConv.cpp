@@ -12,7 +12,7 @@ using FusedActivationFunc = V1_0::FusedActivationFunc;
 bool DepthwiseConv::validate(const Operation& op, NnapiModelInfo* modelInfo) {
     ALOGV("Entering %s", __func__);
     int op_size = op.inputs.size();
-    ALOGD("DepthwiseConv input size = %d\n", op_size);
+    // ALOGD("DepthwiseConv input size = %d\n", op_size);
 
     // Check Output type
     const auto& outputOperand = modelInfo->getOperand(op.outputs[0]);
@@ -143,9 +143,6 @@ bool DepthwiseConv::createNode(const Operation& nnApiOp) {
             ALOGD("Input is of type : const copy / reference %d", nnOperand.dimensions.size());
             auto vals = mModelInfo->GetConstVecOperand<float>(inputIndex);
 
-            for (auto val : vals) {
-                ALOGD("Dumping vals: %f", val);
-            }
             auto in = std::make_shared<ngraph::opset3::Constant>(
                 ngraph::element::f32, ngraph::Shape(toNgraphShape(nnOperand.dimensions)), vals);
             return in;

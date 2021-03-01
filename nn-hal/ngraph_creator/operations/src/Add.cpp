@@ -10,6 +10,7 @@ namespace nnhal {
 using FusedActivationFunc = V1_0::FusedActivationFunc;
 
 bool Add::validate(const Operation& op, NnapiModelInfo* modelInfo) {
+    ALOGV("Entering %s", __func__);
     const auto& input0 = modelInfo->getOperand(op.inputs[0]);
     const auto& input1 = modelInfo->getOperand(op.inputs[1]);
 
@@ -71,10 +72,6 @@ bool Add::createNode(const Operation& nnApiOp) {
                    (nnOperand.lifetime == OperandLifeTime::CONSTANT_REFERENCE)) {
             ALOGD("Input is of type : const copy / reference %d", nnOperand.dimensions.size());
             auto vals = mModelInfo->GetConstVecOperand<float>(inputIndex);
-
-            for (auto val : vals) {
-                ALOGD("Dumping vals: %f", val);
-            }
 
             // auto vals = std::vector<float>(1);
             auto in = std::make_shared<ngraph::opset3::Constant>(

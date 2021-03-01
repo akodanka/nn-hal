@@ -24,7 +24,7 @@ bool Reshape::validate(const Operation& op, NnapiModelInfo* modelInfo) {
         return false;
     }
 
-    if (outputShapeOperand.type != OperandType::INT32) {
+    if (outputShapeOperand.type != OperandType::TENSOR_INT32) {
         ALOGE("NNERR:output shape types invalid,aborting!!");
         return false;
     }
@@ -61,9 +61,6 @@ bool Reshape::createNode(const Operation& nnApiOp) {
             ALOGD("Input is of type : const copy / reference %d", nnOperand.dimensions.size());
             auto vals = mModelInfo->GetConstVecOperand<float>(inputIndex);
 
-            for (auto val : vals) {
-                ALOGD("Dumping vals: %f", val);
-            }
             auto in = std::make_shared<ngraph::opset3::Constant>(
                 ngraph::element::f32, ngraph::Shape(toNgraphShape(nnOperand.dimensions)), vals);
             return in;

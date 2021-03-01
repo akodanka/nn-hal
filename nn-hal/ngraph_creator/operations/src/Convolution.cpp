@@ -12,7 +12,7 @@ using FusedActivationFunc = V1_0::FusedActivationFunc;
 bool Convolution::validate(const Operation& op, NnapiModelInfo* modelInfo) {
     ALOGV("Entering %s", __func__);
     int op_size = op.inputs.size();
-    ALOGD("Convolution input size = %d\n", op_size);
+    // ALOGD("Convolution input size = %d\n", op_size);
 
     // Check Output type
     const auto& outputOperand = modelInfo->getOperand(op.outputs[0]);
@@ -131,10 +131,11 @@ bool Convolution::createNode(const Operation& nnApiOp) {
                    (nnOperand.lifetime == OperandLifeTime::CONSTANT_REFERENCE)) {
             ALOGD("Input is of type : const copy / reference %d", nnOperand.dimensions.size());
             auto vals = mModelInfo->GetConstVecOperand<float>(inputIndex);
-
-            for (auto val : vals) {
-                ALOGD("Dumping vals: %f", val);
-            }
+            // if(nnOperand.lifetime == OperandLifeTime::CONSTANT_COPY){
+            //  for (auto val : vals) {
+            //         ALOGD("Dumping vals: %f", val);
+            //     }
+            // }
             auto in = std::make_shared<ngraph::opset3::Constant>(
                 ngraph::element::f32, ngraph::Shape(toNgraphShape(nnOperand.dimensions)), vals);
             return in;
@@ -250,7 +251,7 @@ bool Convolution::createNode(const Operation& nnApiOp) {
 
     std::string activationFnName;
     std::shared_ptr<ngraph::Node> convNode;
-
+    ALOGD("========> Creating convolution node");
     convNode = std::make_shared<ngraph::opset3::Convolution>(
         inputNode, filterNode, ngraph::Strides(strides), ngraph::CoordinateDiff(pads_begin),
         ngraph::CoordinateDiff(pads_end), ngraph::Strides(dilations), auto_pad);
